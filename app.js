@@ -20,28 +20,34 @@ var router = express.Router(); // Instance of Express Router
 router.route('/ssbs')
     .post(function(req, res) {
         var msg = null;
-        var ssb = new SSB();
-        ssb.name = req.body.name;
+        var ssb = new SSB(req.body);
+        /*ssb.name = req.body.name;
         ssb.IT = req.body.IT;
-        ssb.GD = req.body.GD;
+        ssb.GD = req.body.GD;*/
 
         ssb.save(function(err) {
-            if (err) console.log('Error in POST:', err);
-            else {
+            if (err) {
+                res.json({ 'Status': 400 });
+                console.log('Error in POST:', err);
+            } else {
                 msg = ssb.name + ' Created';
-                res.json({ message: msg });
+                res.json({ message: msg, 'Status': 201 });
+                console.log(req.originalUrl,req.method)
             }
         })
     })
-// GET API 
-.get(function(req, res) {
-    SSB.find(function(err, ssb) {
-        if (err) console.log('Err in GET', err);
-        else {
-            res.json({ ssb });
-        }
+    // GET API 
+    .get(function(req, res) {
+        SSB.find(function(err, ssb) {
+            if (err) {
+                res.json({ 'Status': 400 });
+                console.log('Err in GET', err);
+            } else {
+                res.json({ ssb, 'Status': 200 });
+                console.log(req.originalUrl,req.method)
+            }
+        })
     })
-})
 
 
 
