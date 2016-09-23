@@ -60,6 +60,55 @@ router.route('/ssbs/:ssb_id')
         )
     })
 
+// PUT API to change name
+.put(function(req, res) {
+    var ssb = new SSB(req.body);
+    SSB.findById(req.params.ssb_id, function(err, ssb) {
+        if (err) {
+            res.json({ 'Status': 404 });
+            console.log('Err in GET', err);
+        } else {
+            if (req.body.name) ssb.name = req.body.name;
+            if (req.body.IT) ssb.IT = req.body.IT;
+            if (req.body.GD) ssb.GD = req.body.GD;
+
+            ssb.save(function(err) {
+                if (err) {
+                    res.json({ 'Status': 400 });
+                    console.log('Error in PUT:', err);
+                } else {
+                    msg = ssb.name + ' Updated';
+                    res.json({ message: msg, 'Status': 202 });
+                    console.log(req.method, req.originalUrl);
+                }
+            })
+        }
+    })
+})
+
+// Delete API
+.delete(function(req, res) {
+    var ssb = new SSB(req.body);
+    SSB.findById(req.params.ssb_id, function(err, ssb) {
+        if (err) {
+            res.json({ 'Status': 404 });
+            console.log('Err in GET', err);
+        } else {
+            ssb.deleteFlag = true;
+            ssb.save(function(err) {
+                if (err) {
+                    res.json({ 'Status': 400 });
+                    console.log('Error in DELETE:', err);
+                } else {
+                    msg = ssb.name + ' Deleted';
+                    res.json({ message: msg, 'Status': 200 });
+                    console.log(req.method, req.originalUrl);
+                }
+            })
+        }
+    })
+})
+
 
 
 // Middleware to use for all requests

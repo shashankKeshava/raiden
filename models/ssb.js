@@ -5,7 +5,11 @@ var Schema = mongoose.Schema;
 var ssbSchema = new Schema({
     name: String,
     IT: Number,
-    GD: Boolean
+    GD: Boolean,
+    deleteFlag: {
+        type: Boolean,
+        default: false
+    }
 });
 
-module.exports = mongoose.model( 'ssb', ssbSchema );
+module.exports = mongoose.model('ssb', ssbSchema);
