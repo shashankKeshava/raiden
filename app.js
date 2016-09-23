@@ -21,10 +21,6 @@ router.route('/ssbs')
     .post(function(req, res) {
         var msg = null;
         var ssb = new SSB(req.body);
-        /*ssb.name = req.body.name;
-        ssb.IT = req.body.IT;
-        ssb.GD = req.body.GD;*/
-
         ssb.save(function(err) {
             if (err) {
                 res.json({ 'Status': 400 });
@@ -32,7 +28,7 @@ router.route('/ssbs')
             } else {
                 msg = ssb.name + ' Created';
                 res.json({ message: msg, 'Status': 201 });
-                console.log(req.originalUrl,req.method)
+                console.log(req.method, req.originalUrl);
             }
         })
     })
@@ -40,20 +36,35 @@ router.route('/ssbs')
     .get(function(req, res) {
         SSB.find(function(err, ssb) {
             if (err) {
-                res.json({ 'Status': 400 });
+                res.json({ 'Status': 404 });
                 console.log('Err in GET', err);
             } else {
                 res.json({ ssb, 'Status': 200 });
-                console.log(req.originalUrl,req.method)
+                console.log(req.method, req.originalUrl);
             }
         })
+    });
+
+router.route('/ssbs/:ssb_id')
+    .get(function(req, res) {
+        SSB.findById(req.params.ssb_id,
+            function(err, ssb) {
+                if (err) {
+                    res.json({ 'Status': 404 });
+                    console.log('Err in GET', err);
+                } else {
+                    res.json({ ssb, 'Status': 200 });
+                    console.log(req.method, req.originalUrl);
+                }
+            }
+        )
     })
 
 
 
 // Middleware to use for all requests
 router.use(function(req, res, next) {
-    console.log(req.method, 'API triggered...');
+    console.log(req.method, 'Request triggered...');
     next();
 })
 
