@@ -1,60 +1,61 @@
 var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-
-var routes = require('./routes/index');
-var users = require('./routes/users');
-
 var app = express();
+var bodyParser = require('body-parser'); // Gives middleware available under the req.body property
+var mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost/ima');
+var SSB = require('./models/ssb');
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'html');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+// configure app to use bodyParser()
+// this will let us get the data from a POST
+app.use(bodyParser.urlencoded({ extended: true }));
+//  Parse Application/JSON
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', routes);
-app.use('/users', users);
+var port = process.env.port || 8000;
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
+var router = express.Router(); // Instance of Express Router
 
-// error handlers
+// Routes in Raiden for POST operations
+router.route('/ssbs')
+    .post(function(req, res) {
+        var msg = null;
+        var ssb = new SSB();
+        ssb.name = req.body.name;
+        ssb.IT = req.body.IT;
+        ssb.GD = req.body.GD;
 
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
-  });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
+        ssb.save(function(err) {
+            if (err) console.log('Error in POST:', err);
+            else {
+                msg = ssb.name + ' Created';
+                res.json({ message: msg });
+            }
+        })
+    })
+// GET API 
+.get(function(req, res) {
+    SSB.find(function(err, ssb) {
+        if (err) console.log('Err in GET', err);
+        else {
+            res.json({ ssb });
+        }
+    })
+})
 
 
-module.exports = app;
+
+// Middleware to use for all requests
+router.use(function(req, res, next) {
+    console.log(req.method, 'API triggered...');
+    next();
+})
+
+// GET API
+router.get('/', function(req, res) {
+    res.json({ message: 'API working...' });
+})
+
+app.use('/api', router);
+app.listen(port);
+console.log('Server running on ', port);
